@@ -1,0 +1,56 @@
+[
+  {
+    "id": "P-001",
+    "title": "قطعة أرض زراعية قرب الساقية",
+    "type": "قطعة أرض زراعية",
+    "location": "مدينة كلاّ السّرحنا - الدوار الشمالي",
+    "latitude": 31.2065,
+    "longitude": -8.6609,
+    "area_m2": 5000,
+    "price_mad": 150000,
+    "description": "أرض صالحة للزراعة بجانب الساقية، تربة خصبة وقريبة من الطريق الرئيسي.",
+    "images": [
+      "https://via.placeholder.com/800x600.png?text=Terrain+1"
+    ],
+    "contact_name": "Horizon Alliance",
+    "contact_phone": "+212600000001",
+    "status": "متاح",
+    "date_posted": "2026-07-30"
+  },
+  {
+    "id": "P-002",
+    "title": "مزرعة عملية مع بنايات خدمات",
+    "type": "مزرعة",
+    "location": "قرب عين الصفا",
+    "latitude": 31.2210,
+    "longitude": -8.6750,
+    "area_m2": 12000,
+    "price_mad": 480000,
+    "description": "مزرعة مجهزة بمخزن ومصدر ماء، مناسبة لتربية المواشي أو مشاريع زراعية.",
+    "images": [
+      "https://via.placeholder.com/800x600.png?text=Ferme+1"
+    ],
+    "contact_name": "Horizon Alliance",
+    "contact_phone": "+212600000002",
+    "status": "متاح",
+    "date_posted": "2026-07-28"
+  },
+  {
+    "id": "P-003",
+    "title": "قطعة بناء في حي راقٍ",
+    "type": "قطعة بناء",
+    "location": "المنطقة الحضرية",
+    "latitude": 31.1980,
+    "longitude": -8.6525,
+    "area_m2": 350,
+    "price_mad": 75000,
+    "description": "قطعة مخصصة لبناء منزل أو عمارة صغيرة، رخصة بناء قريبة.",
+    "images": [
+      "https://via.placeholder.com/800x600.png?text=Lot+1"
+    ],
+    "contact_name": "Horizon Alliance",
+    "contact_phone": "+212600000003",
+    "status": "محجوز",
+    "date_posted": "2026-07-15"
+  }
+]
