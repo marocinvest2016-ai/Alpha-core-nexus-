@@ -25,24 +25,41 @@ elif choice == "💬 المحادثة الذكية مع وكيل تساوت":
                     matched_offers.append(offer)
                     found = True
 
+            # الروابط ديالك
+            youtube = "https://www.youtube.com/@studiotassaout"
+            facebook = "https://www.facebook.com/share/1DLCrNYLbV/"
+            maps = "https://share.google/M2eVdABaJqJEUqppj"
+            whatsapp = "https://wa.me/212691897126"
+
             if found:
                 response = f"""مرحباً بك في وكالة السلام العقارية بقلعة السراغنة 🏢
 
 ✅ لقينا عروض قريبة لطلبك:
 {matched_offers[0]}
 
-📍 الموقع: https://share.google/9QQ0o94SpD3zAnzZh
-📞 للمعاينة والحجز: +212 691-897126
-قلعة السراغنة - قرب تجزئة العواطف 2"""
+📍 موقعنا: {maps}
+📞 للمعاينة: +212 691-897126
+💬 واتساب مباشر: {whatsapp}
+
+تابعنا:
+▶️ YouTube: {youtube}
+📘 Facebook: {facebook}"""
             else:
                 response = f"""مرحباً بك في وكالة السلام العقارية بقلعة السراغنة 🏢
 
 طلبك: {user_input}
-حاليا ما عندناش هاد العرض بالضبط ولكن عندنا عروض أخرى.
+حاليا ما عندناش هاد العرض بالضبط.
 
-📞 تواصل معنا للمزيد: +212 691-897126
-📍 الموقع: https://share.google/9QQ0o94SpD3zAnzZh"""
+📍 موقعنا: {maps}
+📞 تواصل: +212 691-897126
+💬 واتساب: {whatsapp}
+
+شوف عروضنا:
+▶️ YouTube: {youtube}
+📘 Facebook: {facebook}"""
 
             st.success(response)
+            st.link_button("💬 تواصل عبر واتساب الآن", whatsapp, type="primary")
+
         else:
             st.warning("من فضلك اكتب سؤالك")
