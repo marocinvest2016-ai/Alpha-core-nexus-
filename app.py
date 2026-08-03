@@ -1,38 +1,48 @@
-import streamlit as st
-import pandas as pd
-import os
+elif choice == "💬 المحادثة الذكية مع وكيل تساوت":
+    import os
 
-# --- دالة قراءة العروض من descriptions.txt ---
-def load_offers():
-    file_path = "descriptions.txt"
-    if not os.path.exists(file_path):
-        return []
-    with open(file_path, "r", encoding="utf-8") as f:
-        lines = f.readlines()
-    # أول سطر هو اسم الوكالة، الباقي عروض
-    offers = [line.strip() for line in lines[1:] if "|" in line]
-    return offers
+    def load_offers():
+        file_path = "descriptions.txt"
+        if not os.path.exists(file_path):
+            return []
+        with open(file_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+        return [line.strip() for line in lines[1:] if "|" in line]
 
-# --- قسم المحادثة الذكية ---
-st.header("💬 المحادثة الذكية مع وكيل تساوت")
-st.write("اسأل عن عقارات قلعة السراغنة...")
+    st.header("💬 المحادثة الذكية مع وكيل تساوت")
+    st.write("اسأل عن عقارات قلعة السراغنة...")
 
-user_input = st.text_input("اكتب سؤالك هنا:", key="chat_input")
+    user_input = st.text_input("اكتب سؤالك هنا:", key="chat_input")
 
-if st.button("إرسال", key="send_chat"):
-    if user_input:
-        offers = load_offers()
-        
-        # الجواب النهائي المباشر
-        response = f"""مرحباً بك في وكالة تساوت الرقمية للعقار والأعمال 🏢
+    if st.button("إرسال", key="send_chat"):
+        if user_input:
+            offers = load_offers()
+            found = False
+            matched_offers = []
+
+            for offer in offers:
+                if any(word in offer.lower() for word in user_input.lower().split() if len(word) > 3):
+                    matched_offers.append(offer)
+                    found = True
+
+            if found:
+                response = f"""مرحباً بك في وكالة السلام العقارية بقلعة السراغنة 🏢
+
+✅ لقينا عروض قريبة لطلبك:
+{matched_offers[0]}
+
+📍 الموقع: https://share.google/9QQ0o94SpD3zAnzZh
+📞 للمعاينة والحجز: +212 691-897126
+قلعة السراغنة - قرب تجزئة العواطف 2"""
+            else:
+                response = f"""مرحباً بك في وكالة السلام العقارية بقلعة السراغنة 🏢
 
 طلبك: {user_input}
+حاليا ما عندناش هاد العرض بالضبط ولكن عندنا عروض أخرى.
 
-للاستفسار والحجز والمعاينة تواصل معنا مباشرة:
-📞 0691897126
+📞 تواصل معنا للمزيد: +212 691-897126
+📍 الموقع: https://share.google/9QQ0o94SpD3zAnzZh"""
 
-قلعة السراغنة - فريقنا جاهز 24/7"""
-        
-        st.success(response)
-    else:
-        st.warning("من فضلك اكتب سؤالك")
+            st.success(response)
+        else:
+            st.warning("من فضلك اكتب سؤالك")
