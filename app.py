@@ -49,3 +49,50 @@ elif choice == "📞 اتصل بنا":
     st.header("📞 اتصل بنا")
     st.write(f"الهاتف: {PHONE}")
     st.link_button("📍 الخريطة", MAPS)
+
+[
+  {
+    "id": "T-HOUDA-001",
+    "title": "بقعة سكنية - تجزئة الهدى",
+    "type": "بقعة سكنية",
+    "price": 180000,
+    "surface": 120,
+    "description": "بقعة للبناء في تجزئة الهدى بقلعة السراغنة. موقع استراتيجي وقريب من جميع المرافق. الأوراق ثبوتية.",
+    "image_url": "https://via.placeholder.com/400x250.png?text=Tajzia+Al+Houda",
+    "contact_email": "marocinvest201@gmail.com",
+    "contact_whatsapp": "0691897126"
+  },
+  {
+    "id": "T-HOUDA-002",
+    "title": "بقعة تجارية - تجزئة الهدى",
+    "type": "بقعة تجارية",
+    "price": 350000,
+    "surface": 240,
+    "description": "بقعة صالحة لبناء عمارة او مشروع تجاري. واجهة على الشارع الرئيسي. اسعار تنافسية.",
+    "image_url": "https://via.placeholder.com/400x250.png?text=Terrain+Commercial",
+    "contact_email": "marocinvest201@gmail.com",
+    "contact_whatsapp": "0691897126"
+  },
+  {
+    "id": "F-001",
+    "title": "ارض فلاحية مرخصة للبناء",
+    "type": "ارض فلاحية",
+    "price": 900000,
+    "surface": 10000,
+    "description": "ارض فلاحية مرخصة للبناء + الصك العقاري. مجهزة بالماء والكهرباء. فرصة استثمار.",
+    "image_url": "https://via.placeholder.com/400x250.png?text=Terrain+Agricole",
+    "contact_email": "marocinvest201@gmail.com",
+    "contact_whatsapp": "0691897126"
+  },
+  {
+    "id": "F-002",
+    "title": "فيرمة جاهزة للاستغلال",
+    "type": "فلاحية للاستغلال",
+    "price": 1500000,
+    "surface": 20000,
+    "description": "فيرمة مجهزة بالكامل. للبيع او الكراء او الشراكة. استثمار واعد في الفلاحة.",
+    "image_url": "https://via.placeholder.com/400x250.png?text=Ferme",
+    "contact_email": "marocinvest201@gmail.com",
+    "contact_whatsapp": "0691897126"
+  }
+]
