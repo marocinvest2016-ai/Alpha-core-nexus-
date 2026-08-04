@@ -1,19 +1,35 @@
-# Agence Immobilière Essalam - وكالة السلام العقارية
+Skip to content
+Alpha-core-nexus-
+Repository navigation
+Code
+Issues
+Pull requests
+Alpha-core-nexus-/sraghna-agentic-ai-team
+/annonces.md
+marocinvest2016-ai
+marocinvest2016-ai
+1 minute ago
+20 lines (16 loc) · 753 Bytes
 
-**Mission**: Transaction professionnelle Achat, Vente, Location - Province El Kelaâ des Sraghna
+Preview
 
-**Coordonnées**
-- Téléphone / WhatsApp: +212 691-897126 / +212 611-715984
-- Adresse: Lotissement Essalam, près de Aawatif 2, El Kelaâ des Sraghna
-- Service: 24h/24 - 7j/7
+Code
 
-**Catalogue**
-1.  Lots de terrains à bâtir: R+1 / R+2 / Immeubles résidentiels
-2.  Immobilier agricole: Terres nues, Domaines, Fermes oléicoles clés en main
-3.  Visites Virtuelles: [Chaîne YouTube Agence Kelaa](https://www.youtube.com/@Agencekelaa)
+Blame
+وكالة تساوت الرقمية للعقار والأعمال
+Kelaâ des Sraghna
+التواصل:
 
-### Nouvelles capacités de DANA
-- Agent Ventes: Répondre aux appels WhatsApp "prix terrain à Essalam?"  
-- Agent Marketing: Créer post "Nouveau lot R+2 disponible" + vidéo YouTube  
-- Agent Admin: Prendre RDV visite, gérer les dossiers  
-- Agent Analyse: Donner estimation prix m² par quartier sur demande
+📞 0691 897126
+📧 marocinvest2012@gmail.com
+1. بقع تجزئة الهدى - للبيع
+المساحة: 80م² إلى 240م²+
+النوع: سكني، تجاري، منازل، عمارات
+المميزات: موقع استراتيجي، أسعار تنافسية، وثائق قانونية
+2. للكراء الشهري
+شقق ومكاتب جاهزة
+3. فرص استثمار
+أراضي فلاحية مرخصة للبناء
+فيرمات جاهزة للاستغلال
+أراضي للبيع / الكراء / الشراكة
+مجالات: الفلاحة، الصناعة، التجارة، الخدمات
