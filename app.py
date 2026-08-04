@@ -33,7 +33,7 @@ if page == "🏠 الرئيسية":
     """)
     st.info("استخدم القائمة الجانبية لتصفح العروض، التحدث مع الوكيل الذكي، أو إدارة المحتوى.")
 
-# --- عرض العقارات ---
+# --- عرض العقارات بتصميم بطاقات أنيقة ---
 elif page == "📋 عرض العقارات":
     st.title("📋 جميع العروض العقارية والاستثمارية")
     
@@ -47,24 +47,29 @@ elif page == "📋 عرض العقارات":
             
     if remote_desc:
         st.success("✅ تم جلب أحدث العروض مباشرة من مستودع GitHub:")
-        for line in remote_desc.split("\n"):
+        
+        # عرض البيانات المنسقة ببطاقات
+        lines = remote_desc.split("\n")
+        for line in lines:
             if line.strip():
-                if "📞" in line or "الهاتف" in line:
-                    st.success(line)
-                elif "•" in line or "-" in line:
-                    st.markdown(f"🔹 {line}")
+                parts = line.split("|")
+                if len(parts) >= 5:
+                    img_name, title, category, details, phone = parts[0], parts[1], parts[2], parts[3], parts[4]
+                    
+                    with st.container():
+                        st.markdown(f"""
+                        <div style="padding: 15px; border-radius: 10px; border: 1px solid #e0e0e0; margin-bottom: 15px; background-color: #f9f9f9;">
+                            <h3 style="color: #2c3e50; margin-bottom: 5px;">🏢 {title}</h3>
+                            <p><b>التصنيف:</b> {category}</p>
+                            <p><b>التفاصيل:</b> {details}</p>
+                            <p style="color: #27ae60; font-weight: bold;">📞 للتواصل: {phone}</p>
+                        </div>
+                        """, unsafe_allow_html=True)
                 else:
+                    # سطر احتياطي في حال كان النص عادي غير مقسم
                     st.info(line)
     else:
         st.warning("⚠️ يرجى إدخال GitHub Token في القائمة الجانبية لربط الوكيل وقراءة العروض المحدثة.")
-        st.markdown("""
-        ### العروض الحالية (افتراضية):
-        * **تجزئة الهدى:** بقع سكنية وتجارية من 80م² إلى 240م² فما فوق.
-        * **المنازل والعمارات:** بقع لبناء عمارات أو مشاريع تجارية بمواقع استراتيجية.
-        * **الكراء:** شقق ومكاتب جاهزة للكراء الشهري.
-        * **الاستثمار الفلاحي:** أراضي فلاحية مرخصة، فيرمات جاهزة، وشراكات مع الأوراق الثبوتية.
-        📞 **للتواصل:** 0691897126
-        """)
 
 # --- المحادثة الذكية ---
 elif page == "💬 المحادثة الذكية مع وكيل تساوت":
@@ -90,7 +95,7 @@ elif page == "🤖 إدارة الملفات والـ GitHub":
         st.warning("⚠️ يرجى إدخال GitHub Token في القائمة الجانبية لتفعيل خاصية التعديل.")
     else:
         file_path = st.text_input("مسار الملف:", value="descriptions.txt")
-        file_content = st.text_area("محتوى الملف الجديد:", value="وكالة تساوت الرقمية للعقار والأعمال بقلعة السراغنة\n📞 للتواصل: 0691897126")
+        file_content = st.text_area("محتوى الملف الجديد:", value="tazette_terrain.jpg|بقع سكنية وتجارية للبيع في تجزئة الهدى|بقع سكنية وتجارية|من 80م² إلى 240م² مع موقع استراتيجي وأسعار تنافسية|0691897126")
         commit_msg = st.text_input("رسالة الـ Commit:", value="Update descriptions.txt via Agent")
         
         if st.button("رفع وتحديث الملف على GitHub"):
