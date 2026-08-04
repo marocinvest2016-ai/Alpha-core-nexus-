@@ -14,14 +14,18 @@ def agent_analyse(message, from_number, df_catalogue):
     # Prix m² by location
     if "prix m2" in message or "m² aawatif" in message:
         try:
-            aawatif = df_catalogue[df_catalogue['localisation'] == 'Quartier Aawatif'].iloc[0]
-            response = f"""
+            matching = df_catalogue[df_catalogue['localisation'] == 'Quartier Aawatif']
+            if matching.empty:
+                response = "❌ Données Aawatif non trouvées"
+            else:
+                aawatif = matching.iloc[0]
+                response = f"""
 📊 ANALYSE PRIX - QUARTIER AAWATIF
 
 Localisation: Quartier Aawatif
 📐 Prix/m²: {int(aawatif['prix_par_m2'])} DH/m²
 🏗️ Type: R+1 Constructible
-📏 Superficie disponible: {int(aawatif['superficie_m2'])} m²
+📄 Superficie disponible: {int(aawatif['superficie_m2'])} m²
 💰 Total: {int(aawatif['superficie_m2'] * aawatif['prix_par_m2']):,} DH
 
 Comparaison Essalam:
@@ -30,13 +34,14 @@ Comparaison Essalam:
 • Agricole: 50 DH/m²
 
 📞 Infos détaillées: +212 691-897126
-            """.strip()
+                """.strip()
         except Exception as e:
             response = f"❌ Erreur analyse Aawatif: {str(e)}"
     
     # Comparaison R+2 vs R+1
     elif "comparaison" in message or "r+2 vs r+1" in message:
-        response = f"""
+        try:
+            response = f"""
 📊 ANALYSE COMPARATIVE - ESSALAM
 
 🔴 LOT R+2 (Lotissement Essalam)
@@ -51,7 +56,7 @@ Comparaison Essalam:
   • Total: 850,000 DH
   • Avantage: Plus spacieux, eau/électricité proche
 
-🌱 FERME OLÉICOLE
+🟡 FERME OLÉICOLE
   • Superficie: 5,000 m²
   • Prix/m²: 50 DH
   • Total: 250,000 DH
@@ -59,12 +64,15 @@ Comparaison Essalam:
 
 💡 Conseil: Selon votre budget et projet!
 📞 Analyse personnalisée: +212 691-897126
-        """.strip()
+            """.strip()
+        except Exception as e:
+            response = f"❌ Erreur lors de la comparaison: {str(e)}"
     
     # Tendance marché
     elif "tendance" in message or "marché" in message or "évolution" in message:
-        response = f"""
-📈 TENDANCE MARCHÉ - KELAÂ SRAGHNA 2026
+        try:
+            response = f"""
+📈 TENDANCE MARCHÉ - KELÂ SRAGHNA 2026
 
 ✅ Demande: En hausse (+15% YoY)
 ✅ Disponibilité: Limitée (terrains prime)
@@ -77,9 +85,11 @@ FACTEURS POSITIFS:
 ✨ Zone commerciale proche
 ✨ Services 24h/24
 
-💼 Investissement recommandé: OUI
+📊 Investissement recommandé: OUI
 📞 Stratégie personnalisée: +212 691-897126
-        """.strip()
+            """.strip()
+        except Exception as e:
+            response = f"❌ Erreur analyse tendance: {str(e)}"
     
     # Default analysis response
     if not response:

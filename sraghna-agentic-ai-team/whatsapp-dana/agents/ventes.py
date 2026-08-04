@@ -16,9 +16,13 @@ def agent_ventes(message, from_number, df_catalogue):
     # R+2 query
     if "r+2" in message and ("essalam" in message or "prix" in message):
         try:
-            lot = df_catalogue[df_catalogue['reference'] == 'LOT-R+2-01'].iloc[0]
-            total_prix = int(lot['superficie_m2'] * lot['prix_par_m2'])
-            response = f"""
+            matching = df_catalogue[df_catalogue['reference'] == 'LOT-R+2-01']
+            if matching.empty:
+                response = "❌ LOT-R+2-01 not found in catalogue"
+            else:
+                lot = matching.iloc[0]
+                total_prix = int(lot['superficie_m2'] * lot['prix_par_m2'])
+                response = f"""
 🔥 LOT R+2 DISPONIBLE
 
 Réf: {lot['reference']}
@@ -32,17 +36,21 @@ Réf: {lot['reference']}
 📞 Contact: {lot['contact']}
 Agence Essalam - Service 24h/24
 Visites virtuelles: youtube.com/@Agencekelaa
-            """.strip()
+                """.strip()
         except Exception as e:
             response = f"❌ Erreur recherche LOT-R+2-01: {str(e)}"
     
     # R+1 query
     elif "r+1" in message and "essalam" in message:
         try:
-            lot = df_catalogue[df_catalogue['reference'] == 'LOT-R+1-02'].iloc[0]
-            total_prix = int(lot['superficie_m2'] * lot['prix_par_m2'])
-            response = f"""
-🟢 LOT R+1 DISPONIBLE
+            matching = df_catalogue[df_catalogue['reference'] == 'LOT-R+1-02']
+            if matching.empty:
+                response = "❌ LOT-R+1-02 not found in catalogue"
+            else:
+                lot = matching.iloc[0]
+                total_prix = int(lot['superficie_m2'] * lot['prix_par_m2'])
+                response = f"""
+🏠 LOT R+1 DISPONIBLE
 
 Réf: {lot['reference']}
 📍 {lot['localisation']}
@@ -54,17 +62,21 @@ Réf: {lot['reference']}
 
 📞 Contact: {lot['contact']}
 Agence Essalam - Service 24h/24
-            """.strip()
+                """.strip()
         except Exception as e:
             response = f"❌ Erreur recherche LOT-R+1-02: {str(e)}"
     
     # Ferme query
     elif "ferme" in message or "agricole" in message:
         try:
-            lot = df_catalogue[df_catalogue['reference'] == 'Ferme-OL-01'].iloc[0]
-            total_prix = int(lot['superficie_m2'] * lot['prix_par_m2'])
-            response = f"""
-🌱 FERME OLÉICOLE DISPONIBLE
+            matching = df_catalogue[df_catalogue['reference'] == 'Ferme-OL-01']
+            if matching.empty:
+                response = "❌ Ferme-OL-01 not found in catalogue"
+            else:
+                lot = matching.iloc[0]
+                total_prix = int(lot['superficie_m2'] * lot['prix_par_m2'])
+                response = f"""
+🌳 FERME OLÉICOLE DISPONIBLE
 
 Réf: {lot['reference']}
 📍 {lot['localisation']}
@@ -76,22 +88,25 @@ Réf: {lot['reference']}
 
 📞 Contact: {lot['contact']}
 Agence Essalam - Service 24h/24
-            """.strip()
+                """.strip()
         except Exception as e:
             response = f"❌ Erreur recherche ferme: {str(e)}"
     
     # General price inquiry
     elif "prix" in message:
-        response = f"""
+        try:
+            response = f"""
 💰 PRIX ESSALAM - Catalogue Actuel:
 
 ✨ LOT-R+2-01: 200m² × 3500 DH/m² = 700,000 DH
 ✨ LOT-R+1-02: 250m² × 3400 DH/m² = 850,000 DH
-🌱 Ferme-OL-01: 5000m² × 50 DH/m² = 250,000 DH
+🌳 Ferme-OL-01: 5000m² × 50 DH/m² = 250,000 DH
 
 📞 Infos détaillées: +212 691-897126
 Visites 24h/24 - Agence Essalam
-        """.strip()
+            """.strip()
+        except Exception as e:
+            response = f"❌ Erreur lors de la lecture du catalogue: {str(e)}"
     
     # Default response
     if not response:

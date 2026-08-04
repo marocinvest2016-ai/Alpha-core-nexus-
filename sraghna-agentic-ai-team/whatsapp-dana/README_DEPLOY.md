@@ -65,7 +65,7 @@ Le serveur sera accessible à: `http://localhost:5000`
 
 ---
 
-## 🧪 Test du Webhook Localement
+## 🧪 Tests du Webhook Localement
 
 ### Test 1: Health Check
 ```bash
@@ -82,6 +82,23 @@ Réponse attendue:
 curl http://localhost:5000/catalogue
 ```
 
+Réponse attendue:
+```json
+[
+  {
+    "id": "T001",
+    "reference": "LOT-R+2-01",
+    "localisation": "Lotissement Essalam",
+    "superficie_m2": 200,
+    "prix_par_m2": 3500,
+    "status": "Disponible",
+    "description": "Lot R+2, proche route principale",
+    "contact": "+212691897126"
+  },
+  ...
+]
+```
+
 ### Test 3: Simuler un message WhatsApp
 ```bash
 curl -X POST http://localhost:5000/webhook \
@@ -94,6 +111,89 @@ curl -X POST http://localhost:5000/webhook \
             "from": "212691234567",
             "type": "text",
             "text": {"body": "Quel est le prix des terrains R+2 à Essalam?"}
+          }]
+        }
+      }]
+    }]
+  }'
+```
+
+Réponse attendue:
+```json
+{"status": "received"}
+```
+
+Et le log affichera:
+```
+✅ Message sent to 212691234567: 200
+```
+
+---
+
+## 📲 Commandes CURL de Test Prêtes à Copier-Coller
+
+### Sur Render après déploiement, remplace `https://dana-whatsapp.onrender.com` par ton URL:
+
+#### 1️⃣ Health Check (vérifie que le serveur est vivant)
+```bash
+curl https://dana-whatsapp.onrender.com/health
+```
+
+#### 2️⃣ Catalogue (affiche tous les terrains disponibles)
+```bash
+curl https://dana-whatsapp.onrender.com/catalogue
+```
+
+#### 3️⃣ Test Webhook - Message "Prix terrain R+2"
+```bash
+curl -X POST https://dana-whatsapp.onrender.com/webhook \
+  -H "Content-Type: application/json" \
+  -d '{
+    "entry": [{
+      "changes": [{
+        "value": {
+          "messages": [{
+            "from": "212691234567",
+            "type": "text",
+            "text": {"body": "Quel est le prix des terrains R+2 à Essalam?"}
+          }]
+        }
+      }]
+    }]
+  }'
+```
+
+#### 4️⃣ Test Webhook - Message "Visite RDV"
+```bash
+curl -X POST https://dana-whatsapp.onrender.com/webhook \
+  -H "Content-Type: application/json" \
+  -d '{
+    "entry": [{
+      "changes": [{
+        "value": {
+          "messages": [{
+            "from": "212691234567",
+            "type": "text",
+            "text": {"body": "Je veux une visite"}
+          }]
+        }
+      }]
+    }]
+  }'
+```
+
+#### 5️⃣ Test Webhook - Message "Comparaison prix"
+```bash
+curl -X POST https://dana-whatsapp.onrender.com/webhook \
+  -H "Content-Type: application/json" \
+  -d '{
+    "entry": [{
+      "changes": [{
+        "value": {
+          "messages": [{
+            "from": "212691234567",
+            "type": "text",
+            "text": {"body": "Comparaison R+2 vs R+1"}
           }]
         }
       }]
@@ -191,6 +291,7 @@ python app.py  # Ou via systemd/supervisor
    ```bash
    curl -X GET "https://dana-whatsapp.onrender.com/webhook?hub.verify_token=dana_webhook_2026&hub.challenge=test"
    ```
+   
    → Doit retourner `test`
 
 4. **Envoie un message WhatsApp** à +212 691-897126:
@@ -206,6 +307,7 @@ python app.py  # Ou via systemd/supervisor
 ### Agent Ventes (`agents/ventes.py`)
 - Mots-clés: "prix", "terrain", "r+2", "r+1", "essalam"
 - Retourne: Prix, superficie, description, contact
+- Gestion erreurs: `try/except` sur `.iloc[0]` + validation référence
 
 ### Agent Marketing (`agents/marketing.py`)
 - Mots-clés: "video", "youtube", "photo", "catalogue"
@@ -218,6 +320,7 @@ python app.py  # Ou via systemd/supervisor
 ### Agent Analyse (`agents/analyse.py`)
 - Mots-clés: "prix m²", "comparaison", "tendance", "marché"
 - Retourne: Analyses prix, comparaisons, recommandations
+- Gestion erreurs: `try/except` sur `.iloc[0]` + validation résultats
 
 ---
 
@@ -241,12 +344,14 @@ tail -f app.log  # Si tu redirige les logs
 
 ### "Catalogue not loading"
 → Vérifie le chemin CSV, make sure fichier existe sur `main`
+→ Check les logs: "Looking for: /path/to/csv"
 
 ### "Messages not sending"
 → Vérifie TOKEN et PHONE_NUMBER_ID, test avec curl
 
 ### "500 Internal Server Error"
 → Regarde les logs, check les exceptions Python
+→ Vérifie que la référence existe dans le CSV
 
 ---
 
@@ -268,6 +373,7 @@ tail -f app.log  # Si tu redirige les logs
 - [ ] Message test envoyé via WhatsApp → Réponse DANA reçue
 - [ ] Agent Ventes répond aux "prix terrain R+2 Essalam" ✓
 - [ ] Agent Admin gère les "visite" et "rdv" ✓
+- [ ] Agent Analyse réagit aux "comparaison" et "prix m²" ✓
 - [ ] Logs monitoring en place ✓
 
 **Tu es prêt pour DANA 24/7 en production! 🎉📲**

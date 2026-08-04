@@ -11,11 +11,13 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Configuration
+# Configuration - Dynamic CSV path (works local + prod)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CSV_PATH = os.path.join(BASE_DIR, "data", "immobilier", "catalogue_terrains.csv")
+
 WHATSAPP_TOKEN = os.getenv("WHATSAPP_TOKEN")
 PHONE_NUMBER_ID = os.getenv("PHONE_NUMBER_ID")
 VERIFY_TOKEN = os.getenv("VERIFY_TOKEN")
-CSV_PATH = "sraghna-agentic-ai-team/data/immobilier/catalogue_terrains.csv"
 
 # Import DANA agents
 from agents.ventes import agent_ventes
@@ -26,8 +28,10 @@ from agents.analyse import agent_analyse
 # Load catalogue once at startup
 try:
     df_catalogue = pd.read_csv(CSV_PATH)
+    print(f"✅ Catalogue loaded from: {CSV_PATH}")
 except Exception as e:
-    print(f"Error loading CSV: {e}")
+    print(f"⚠️ Error loading CSV: {e}")
+    print(f"Looking for: {CSV_PATH}")
     df_catalogue = None
 
 
@@ -78,7 +82,7 @@ def webhook():
             return jsonify({"status": "received"}), 200
         
         except Exception as e:
-            print(f"Error processing webhook: {e}")
+            print(f"❌ Error processing webhook: {e}")
             return jsonify({"error": str(e)}), 500
 
 
@@ -139,9 +143,9 @@ def send_whatsapp_message(to_number, text):
     try:
         response = requests.post(url, json=payload, headers=headers)
         response.raise_for_status()
-        print(f"Message sent to {to_number}: {response.status_code}")
+        print(f"✅ Message sent to {to_number}: {response.status_code}")
     except requests.exceptions.RequestException as e:
-        print(f"Error sending message: {e}")
+        print(f"❌ Error sending message: {e}")
 
 
 @app.route("/health", methods=["GET"])
