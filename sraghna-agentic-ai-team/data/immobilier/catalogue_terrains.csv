@@ -1,0 +1,5 @@
+id,reference,localisation,superficie_m2,prix_par_m2,status,description,contact
+T001,LOT-R+2-01,Lotissement Essalam,200,3500,Disponible,"Lot R+2, proche route principale",+212691897126
+T002,LOT-R+1-02,Quartier Aawatif,250,3400,Disponible,"Terrain constructible R+1, eau/électricité à proximité",+212691897126
+T003,Ferme-OL-01,Zone Agricole Sud,5000,50,Disponible,"Ferme oléicole clé en main avec oliviers",+212611715984
+T004,TERR-BAT-03,Près Marjana,150,3600,Réservé,"Lot pour maison R+1, accès facile",+212691897126
