@@ -1,83 +1,115 @@
 import streamlit as st
-import json
-import os
+from github import Github
 
-st.set_page_config(page_title="وكالة تساوت الرقمية", page_icon="🏢", layout="wide")
+st.set_page_config(page_title="وكالة تساوت الرقمية للعقار والأعمال", page_icon="🏢", layout="wide")
 
+# --- القائمة الجانبية المنسدلة للتنقل ---
 st.sidebar.title("🏢 وكالة تساوت الرقمية")
-st.sidebar.caption("قلعة السراغنة - في خدمتكم")
-choice = st.sidebar.selectbox("اختر الخدمة", [
-    "🏠 الرئيسية",
-    "📋 عرض العقارات", 
-    "💬 المحادثة الذكية مع وكيل تساوت",
-    "📞 اتصل بنا"
-])
+page = st.sidebar.selectbox("اختر الخدمة", ["🏠 الرئيسية", "📋 عرض العقارات", "💬 المحادثة الذكية مع وكيل تساوت", "🤖 إدارة الملفات والـ GitHub", "📞 اتصل بنا"])
 
-def load_offers():
-    if not os.path.exists("properties.json"): 
-        return []
-    with open("properties.json", "r", encoding="utf-8") as f: 
-        return json.load(f)
+# إعدادات الإتصال بـ GitHub في القائمة الجانبية
+st.sidebar.markdown("---")
+st.sidebar.header("⚙️ إعدادات الوكيل (GitHub)")
+github_token = st.sidebar.text_input("GitHub Token", type="password")
+repo_name = st.sidebar.text_input("Repository", value="marocinvest2016-ai/Alpha-core-nexus-")
 
-YOUTUBE = "https://www.youtube.com/@studiotassaout"
-FACEBOOK = "https://www.facebook.com/share/1DLCrNYLbV/"
-MAPS = "https://share.google/M2eVdABaJqJEUqppj"
-WHATSAPP = "https://wa.me/212691897126"
-PHONE = "+212 691-897126"
-EMAIL = "marocinvest201@gmail.com"
+def get_agent_repo(token, repo_fullName):
+    if not token:
+        return None
+    try:
+        gh = Github(token)
+        return gh.get_repo(repo_fullName)
+    except:
+        return None
 
-if choice == "🏠 الرئيسية":
-    st.header("مرحباً بك في وكالة تساوت الرقمية 🏢")
-    st.subheader("العقار والاعمال - قلعة السراغنة")
-    st.write("بيع بقع سكنية وتجارية، اراضي فلاحية، فيرمات، كراء شقق ومكاتب")
-    st.link_button("💬 واتساب مباشر", WHATSAPP, type="primary")
+repo = get_agent_repo(github_token, repo_name)
 
-elif choice == "📋 عرض العقارات":
-    st.header("📋 جميع العروض")
-    offers = load_offers()
-    if not offers:
-        st.warning("لا توجد عروض حاليا")
+# --- الصفحة الرئيسية ---
+if page == "🏠 الرئيسية":
+    st.title("🌐 وكالة تساوت الرقمية للعقار والأعمال")
+    st.subheader("قلعة السراغنة - في خدمتكم")
+    st.markdown("""
+    مرحباً بك في المنصة الرقمية الرسمية لوكالة تساوت. نحن نقدم خدمات عقارية متكاملة، استثمارات فلاحية، وشقق ومكاتب للكراء بقلعة السراغنة ومحيطها.
+    """)
+    st.info("استخدم القائمة الجانبية لتصفح العروض، التحدث مع الوكيل الذكي، أو إدارة المحتوى.")
+
+# --- عرض العقارات ---
+elif page == "📋 عرض العقارات":
+    st.title("📋 جميع العروض العقارية والاستثمارية")
     
-    for offer in offers:
-        with st.container(border=True):
-            col1, col2 = st.columns([1, 2])
-            with col1:
-                st.image(offer["image_url"], use_column_width=True)
-            with col2:
-                st.subheader(offer["title"])
-                st.write(f"**النوع:** {offer['type']} | **المساحة:** {offer['surface']} m² | **الثمن:** {offer['price']:,} درهم")
-                st.write(offer["description"])
-                st.write(f"**المرجع:** `{offer['id']}`")
-                
-                wa_msg = f"https://wa.me/212{offer['contact_whatsapp'][1:]}?text=مهتم بـ {offer['title']} المرجع {offer['id']}"
-                c1, c2 = st.columns(2)
-                with c1:
-                    st.link_button("📲 واتساب", wa_msg, type="primary")
-                with c2:
-                    st.link_button("📧 إيميل", f"mailto:{offer['contact_email']}")
+    remote_desc = None
+    if repo:
+        try:
+            file_content = repo.get_contents("descriptions.txt")
+            remote_desc = file_content.decoded_content.decode("utf-8")
+        except:
+            remote_desc = None
+            
+    if remote_desc:
+        st.success("✅ تم جلب أحدث العروض مباشرة من مستودع GitHub:")
+        for line in remote_desc.split("\n"):
+            if line.strip():
+                if "📞" in line or "الهاتف" in line:
+                    st.success(line)
+                elif "•" in line or "-" in line:
+                    st.markdown(f"🔹 {line}")
+                else:
+                    st.info(line)
+    else:
+        st.warning("⚠️ يرجى إدخال GitHub Token في القائمة الجانبية لربط الوكيل وقراءة العروض المحدثة.")
+        st.markdown("""
+        ### العروض الحالية (افتراضية):
+        * **تجزئة الهدى:** بقع سكنية وتجارية من 80م² إلى 240م² فما فوق.
+        * **المنازل والعمارات:** بقع لبناء عمارات أو مشاريع تجارية بمواقع استراتيجية.
+        * **الكراء:** شقق ومكاتب جاهزة للكراء الشهري.
+        * **الاستثمار الفلاحي:** أراضي فلاحية مرخصة، فيرمات جاهزة، وشراكات مع الأوراق الثبوتية.
+        📞 **للتواصل:** 0691897126
+        """)
 
-elif choice == "💬 المحادثة الذكية مع وكيل تساوت":
-    st.header("💬 المحادثة الذكية مع وكيل تساوت")
-    user_input = st.text_input("اكتب سؤالك:", placeholder="مثال: بغيت بقعة تجارية 200 متر")
-    if st.button("إرسال", type="primary"):
-        offers = load_offers()
-        results = [o for o in offers if user_input.lower() in o["title"].lower() or user_input.lower() in o["type"].lower() or user_input.lower() in o["description"].lower()]
-        
-        if results:
-            st.success(f"✅ لقينا ليك {len(results)} عرض مناسب")
-            for r in results:
-                st.info(f"**{r['title']}**\n{r['surface']}m² - {r['price']:,} درهم")
-        else:
-            st.warning("ما لقيناش. ولكن عندنا عروض أخرى")
-        
-        st.write(f"📍 {MAPS}\n📞 {PHONE}\n💬 {WHATSAPP}\n▶️ {YOUTUBE}\n📘 {FACEBOOK}")
-        st.link_button("💬 تواصل عبر واتساب", WHATSAPP, type="primary")
+# --- المحادثة الذكية ---
+elif page == "💬 المحادثة الذكية مع وكيل تساوت":
+    st.title("💬 المحادثة الذكية مع وكيل تساوت")
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+    for m in st.session_state.chat_history:
+        with st.chat_message(m["role"]):
+            st.markdown(m["content"])
+    if prompt := st.chat_input("اسأل عن عقارات قلعة السراغنة..."):
+        st.session_state.chat_history.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+        with st.chat_message("assistant"):
+            reply = f"مرحباً بك في وكالة تساوت الرقمية بقلعة السراغنة. بخصوص طلبك '{prompt}', يرجى الاتصال بنا مباشرة على الرقم: 0691897126 للحجز والاستفسار الفوري."
+            st.markdown(reply)
+            st.session_state.chat_history.append({"role": "assistant", "content": reply})
 
-elif choice == "📞 اتصل بنا":
-    st.header("📞 اتصل بنا")
-    st.write(f"**الهاتف:** {PHONE}")
-    st.write(f"**الإيميل:** {EMAIL}")
-    st.write(f"**العنوان:** قلعة السراغنة")
-    col1, col2 = st.columns(2)
-    with col1: st.link_button("📍 الخريطة", MAPS)
-    with col2: st.link_button("📲 واتساب", WHATSAPP)
+# --- إدارة الملفات والـ GitHub ---
+elif page == "🤖 إدارة الملفات والـ GitHub":
+    st.title("🤖 التحكم المستقل في مستودع GitHub")
+    if not github_token:
+        st.warning("⚠️ يرجى إدخال GitHub Token في القائمة الجانبية لتفعيل خاصية التعديل.")
+    else:
+        file_path = st.text_input("مسار الملف:", value="descriptions.txt")
+        file_content = st.text_area("محتوى الملف الجديد:", value="وكالة تساوت الرقمية للعقار والأعمال بقلعة السراغنة\n📞 للتواصل: 0691897126")
+        commit_msg = st.text_input("رسالة الـ Commit:", value="Update descriptions.txt via Agent")
+        
+        if st.button("رفع وتحديث الملف على GitHub"):
+            try:
+                try:
+                    f = repo.get_contents(file_path)
+                    repo.update_file(file_path, commit_msg, file_content, f.sha)
+                    st.success(f"تم تحديث الملف {file_path} بنجاح!")
+                except:
+                    repo.create_file(file_path, commit_msg, file_content)
+                    st.success(f"تم إنشاء الملف {file_path} بنجاح!")
+            except Exception as e:
+                st.error(f"خطأ أثناء الرفع: {e}")
+
+# --- اتصل بنا ---
+elif page == "📞 اتصل بنا":
+    st.title("📞 اتصل بوكالة تساوت الرقمية")
+    st.markdown("""
+    * **المدينة:** قلعة السراغنة، المغرب.
+    * **الهاتف الرسمي للتواصل:** 0691897126
+    * **الخدمات:** العقارات السكنية والتجارية، الاستثمار الفلاحي، والتجارة والخدمات الرقمية.
+    """)
