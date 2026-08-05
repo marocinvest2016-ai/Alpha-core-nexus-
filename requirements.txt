@@ -1,5 +1,7 @@
-streamlit>=1.40.0
-pandas
-yfinance
-PyGithub
+streamlit==1.40.2
+openai==1.54.0
 python-dotenv
+requests
+yfinance
+pygithub
+pandas
