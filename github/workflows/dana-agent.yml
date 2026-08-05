@@ -1,18 +1,57 @@
-name: Dana Agent
+name: Dana Full Automation
 on:
-  workflow_dispatch:  # تشغيل يدوي
+  workflow_dispatch:
   schedule:
-    - cron: '0 */6 * * *' # كل 6 ساعات
+    - cron: '0 */6 * * *'
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+  actions: write
+  issues: write
 
 jobs:
-  run-dana:
+  dana-core:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.DANA_GITHUB_TOKEN }}
-      - name: Dana Start
+      
+      - name: Dana Setup
         run: |
-          echo "Dana is online. Starting work in Alpha-core-nexus-"
           git config user.name "DANA-AGENT"
           git config user.email "dana@tdl.local"
+          pip install streamlit
+
+      - name: Create Product & Report
+        run: |
+          echo "# PRODUCT: Dana Control Panel v1.0" > PRODUCT.md
+          echo "Deployed by DANA-AGENT on $(date)" >> PRODUCT.md
+          echo "# Dana Report" > DANA_REPORT.md
+          echo "**Status:** ONLINE - Managing Alpha-core-nexus-" >> DANA_REPORT.md
+
+      - name: Auto Commit & Push
+        run: |
+          git add .
+          git commit -m "DANA-AUTO: New product deployed" || echo "No changes"
+          git push
+
+      - name: Create Streamlit Dashboard
+        run: |
+          cat > dana_dashboard.py << 'EOF'
+import streamlit as st, datetime, os
+st.set_page_config(page_title="DANA CONTROL PANEL", layout="wide")
+st.title("🤖 DANA CONTROL PANEL v1.0")
+st.success("Dana is ONLINE and managing: marocinvest2016-ai/Alpha-core-nexus-")
+st.metric("Last Update", datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
+st.write("### Product"); st.code(open("PRODUCT.md").read())
+st.write("### Logs"); st.code(open("DANA_REPORT.md").read())
+EOF
+
+      - name: Deploy to Streamlit
+        if: env.STREAMLIT_TOKEN != ''
+        env:
+          STREAMLIT_TOKEN: ${{ secrets.DANA_STREAMLIT_TOKEN }}
+        run: echo "Dana ready to deploy to Streamlit on next push"
