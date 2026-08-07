@@ -1,6 +1,7 @@
 from datetime import datetime
 import io
 import os
+import zipfile
 import pandas as pd
 from PIL import Image, ImageEnhance
 import streamlit as st
@@ -296,7 +297,7 @@ df_cameras = pd.DataFrame(CAMERAS_100)
 # 4. الواجهة الرئيسية بنظام التبويبات الشاملة
 tab1, tab2, tab3, tab4 = st.tabs([
     "📸 الكاميرا الذكية (MEGA PREMIUM)",
-    "🧠 إدارة الوكيل المتعدد",
+    "🧠 محرك السوبر وكيل (Agentic Core)",
     "🗂️ قاعدة بيانات الـ 100 كاميرا",
     "📦 أرشيف السيرفر",
 ])
@@ -346,27 +347,41 @@ with tab1:
     )
 
 with tab2:
-  st.subheader("🧠 الكبسولة المعلوماتية للوكيل متعدد المجالات")
-  st.write("هنا يتم دمج قواعد البيانات والمنطق التسويقي للعقار واللوجستيك:")
+  st.subheader("🧠 محرك السوبر وكيل (Powered by Agentic Logic)")
+  st.write(
+      "هنا يتم إدارة التوجيهات البرمجية والمهام الميدانية المتقدمة المرتبطة"
+      " بنظام Sraghna Immobilière:"
+  )
 
-  agent_mode = st.radio(
-      "اختر نطاق توجيه الذكاء الاصطناعي:",
+  agent_task = st.selectbox(
+      "اختر المهمة الميدانية:",
       [
-          "Marketing (تسويق عالي الأداء)",
-          "RealEstate (إدارة التجزئات والأراضي)",
-          "Operations (أتمتة ميدانية)",
+          "تحليل صورة عقارية",
+          "توليد تقرير استثماري",
+          "بحث متقدم في قواعد البيانات",
       ],
   )
   user_query = st.text_area(
       "أدخل تعليماتك الخاصة بهذا المجال:",
       placeholder="مثال: جهز لي تقرير بصري وتسويقي لأرض في الهدا...",
   )
-  if st.button("تنفيذ امر السوبر وكيل"):
-    st.success(f"تم تحليل الطلب بنجاح عبر نطاق: {agent_mode}")
-    st.write(
-        "النتيجة التشغيلية: النظام يعمل بكفاءة تامة لمعالجة الملفات الخاصة بـ"
-        " Ameur."
-    )
+
+  if st.button("تفعيل ذكاء الوكيل"):
+    with st.spinner("جاري التواصل مع محرك الاستدلال الذكي..."):
+      st.write(f"✅ تم تفعيل المهمة: **{agent_task}** بنجاح.")
+      st.info(
+          "الوكيل يقوم الآن بمعالجة البيانات الميدانية وتحليل المدخلات الخاصة"
+          " بـ قلعة السراغنة ومراكش..."
+      )
+      st.code(
+          f"""
+[AGENT EXECUTION LOG]
+- المهمة المنفذة: {agent_task}
+- النص المدخل: {user_query if user_query else 'عمليات روتينية تلقائية'}
+- الحالة: جاهز لربط مخرجات النماذج المتقدمة (Awesome LLM Apps) والتعامل مع الأرشيف.
+            """,
+          language="markdown",
+      )
 
 with tab3:
   st.subheader("🗂️ قاعدة بيانات الكاميرات الشاملة (100 كاميرا)")
