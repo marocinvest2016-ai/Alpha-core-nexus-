@@ -5,7 +5,8 @@ class MultiDomainAgent:
         self.domains = {
             "Marketing": "متخصص في توليد الحملات، النصوص التسويقية، وتصميم المحتوى البصري.",
             "RealEstate": "متخصص في مطابقة العقارات، حساب هوامش الربح، وإدارة بيانات التجزئات.",
-            "Operations": "متخصص في أتمتة تدفق العمل، إدارة السيرفرات، وتحديث النظام."
+            "Operations": "متخصص في أتمتة تدفق العمل، إدارة السيرفرات، وتحديث النظام.",
+            "ImageEngine": "متخصص في معالجة الصور والتعديلات البصرية."
         }
 
     def route_request(self, user_input, domain):
@@ -18,11 +19,15 @@ class MultiDomainAgent:
             return f"Agent RealEstate: Analyzing property data for: {user_input}"
         elif domain == "Operations":
             return f"Agent Operations: Executing automation task for: {user_input}"
+        elif domain == "ImageEngine":
+            return f"Agent ImageEngine: Processing visuals for: {user_input}"
         else:
             return "General Agent: Processing query..."
 
-# هذا الملف سيعمل كجسر ربط بين واجهة Streamlit والذكاء الاصطناعي الأساسي.
-def log_to_file(self, domain, query, result):
+    def log_to_file(self, domain, query, result):
+        """
+        دالة تسجيل العمليات (Logs) داخل الكلاس
+        """
         with open("system_logs.txt", "a", encoding="utf-8") as f:
             f.write(f"--- [الوكيل: {domain}] ---\n")
             f.write(f"الطلب: {query}\n")
