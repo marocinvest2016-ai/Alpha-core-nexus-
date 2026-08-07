@@ -22,3 +22,9 @@ class MultiDomainAgent:
             return "General Agent: Processing query..."
 
 # هذا الملف سيعمل كجسر ربط بين واجهة Streamlit والذكاء الاصطناعي الأساسي.
+def log_to_file(self, domain, query, result):
+        with open("system_logs.txt", "a", encoding="utf-8") as f:
+            f.write(f"--- [الوكيل: {domain}] ---\n")
+            f.write(f"الطلب: {query}\n")
+            f.write(f"النتيجة: {result}\n")
+            f.write("--------------------------\n\n")
