@@ -1,4 +1,3 @@
-```python
 from datetime import datetime
 import io
 import os
@@ -7,14 +6,10 @@ import zipfile
 from PIL import Image, ImageEnhance
 import streamlit as st
 
-# 1. إعداد النظام السيادي
-st.set_page_config(
-    page_title="TASSAOUT OMEGA OS", page_icon="👑", layout="wide"
-)
+st.set_page_config(page_title="TASSAOUT OMEGA OS", page_icon="👑", layout="wide")
 GALLERY_FOLDER = "gallery"
 os.makedirs(GALLERY_FOLDER, exist_ok=True)
 
-# 2. قاعدة المعرفة الدائمة للوكيل (موسعة ومغلقة)
 CORE_DB = {
     "sectors": [
         "عقار",
@@ -38,7 +33,6 @@ CORE_DB = {
     },
 }
 
-# 3. دوال الكاميرا والتوثيق الذكي
 ENVIRONMENT_PRESETS = {
     "عقار فخم": {
         "camera": "Hasselblad X2D",
@@ -80,7 +74,6 @@ def save_to_gallery(image, env_name):
   return filename
 
 
-# 4. قوالب التقارير الاحترافية المؤسساتية
 xl_templates = {
     "عقار": lambda city, gear: (
         f"🏢 *تقرير معاينة عقارية - {city}*\nنؤكد لكم أننا قمنا بالمعاينة"
@@ -100,11 +93,9 @@ xl_templates = {
     ),
 }
 
-# 5. حالة النظام
 if "last_action" not in st.session_state:
   st.session_state["last_action"] = "System Idle - Monitoring All Sectors..."
 
-# 6. واجهة المستخدم
 st.title("👑 TASSAOUT OMEGA OS | Field Agent v3.0")
 st.sidebar.success("System Status: Online & Monitoring ✅")
 st.sidebar.metric("الصور المؤرشفة", len(os.listdir(GALLERY_FOLDER)))
@@ -143,7 +134,6 @@ with tab1:
       city = next((c for c in CORE_DB["cities"] if c in user_input), "المغرب")
       gear = CORE_DB["tech"].get(sector, "Universal Sensor")
 
-      # توليد التقرير الاحترافي حسب القطاع
       generator = xl_templates.get(
           sector,
           lambda c, g: (
@@ -160,9 +150,9 @@ with tab1:
       st.info("🔄 الطلب مسجل في سجل المهام العام")
 
     if report_text:
-      whatsapp_number = "2126XXXXXXXX"  # ضع رقم هاتفك هنا بدون علامة +
+      whatsapp_number = "2126XXXXXXXX"
       encoded_text = urllib.parse.quote(report_text)
-      whatsapp_url = f"https://wa.me/{whatsapp_number}?text={encoded_text}"
+      whatsapp_url = f"[https://wa.me/](https://wa.me/){whatsapp_number}?text={encoded_text}"
       st.link_button("📱 إرسال التقرير للواتساب الآن", whatsapp_url)
 
 with tab2:
@@ -177,5 +167,3 @@ with tab2:
         data=zip_buffer.getvalue(),
         file_name=f"ARCHIVE_{datetime.now().strftime('%Y-%m-%d')}.zip",
     )
-
-```
