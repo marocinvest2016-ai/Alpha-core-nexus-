@@ -6,10 +6,14 @@ import zipfile
 from PIL import Image, ImageEnhance
 import streamlit as st
 
-st.set_page_config(page_title="TASSAOUT OMEGA OS", page_icon="👑", layout="wide")
+# 1. إعداد النظام السيادي بشاشة عريضة
+st.set_page_config(
+    page_title="TASSAOUT OMEGA OS", page_icon="👑", layout="wide"
+)
 GALLERY_FOLDER = "gallery"
 os.makedirs(GALLERY_FOLDER, exist_ok=True)
 
+# 2. قاعدة المعرفة والعروض المتاحة (عقارات، سيارات، إلخ)
 CORE_DB = {
     "sectors": [
         "عقار",
@@ -31,8 +35,23 @@ CORE_DB = {
         "مواد إنشائية": "DJI Drone + Sony A1",
         "عام": "Universal Sensor",
     },
+    "listings": {
+        "عقار": [
+            "أرض فلاحية 5 هكتارات بقلعة السراغنة - محفيقة ومجهزة",
+            "بقعة تجارية وسط مراكش - واجهة رئيسية",
+        ],
+        "سيارات": [
+            "شاحنة نقل بضائع دولية - حالة ممتازة موديل حديث",
+            "سيارة نفعية رباعية الدفع - صيانة دورية متميزة",
+        ],
+        "فلاحة": [
+            "تجهيز سقي بقطرة الماء لأنظمة الأراضي الكبرى",
+            "معدات حراثة وتسميد رقمية متطورة",
+        ],
+    },
 }
 
+# 3. إعدادات الكاميرا والتوثيق البصري الفائق
 ENVIRONMENT_PRESETS = {
     "عقار فخم": {
         "camera": "Hasselblad X2D",
@@ -74,96 +93,128 @@ def save_to_gallery(image, env_name):
   return filename
 
 
+# 4. قوالب التقارير الاحترافية
 xl_templates = {
-    "عقار": lambda city, gear: (
-        f"🏢 *تقرير معاينة عقارية - {city}*\nنؤكد لكم أننا قمنا بالمعاينة"
-        f" الميدانية الدقيقة باستخدام تقنيات *{gear}*.\nالوضع: المعاينة مكتملة.\nالتقرير"
-        " الفني: التقييم البصري والتقني متوافق مع معايير الجودة المعتمدة لدينا.\nنحن"
-        " في خدمتكم لاتخاذ الخطوة التالية."
+    "عقار": lambda city, gear, details: (
+        f"🏢 *تقرير معاينة عقارية - {city}*\n\n"
+        f"📌 *العرض المعني:* {details}\n"
+        f"🛠️ *تقنية التوثيق:* {gear}\n\n"
+        "الوضع: المعاينة الميدانية مكتملة بدقة عالية.\n"
+        "التقييم البصري والتقني متوافق مع معايير Sraghna Immobilière.\n"
+        "جاهز لإتمام الصفقة أو العرض."
     ),
-    "سيارات": lambda city, gear: (
-        f"🚛 *تقرير حالة المركبة - {city}*\nتم توثيق حالة المركبة والتحقق من"
-        f" المواصفات باستخدام *{gear}*.\nالتقرير الفني: الحالة العامة ممتازة"
-        " ومطابقة للمواصفات المعلنة.\nلأي تفاصيل إضافية، فريقنا في خدمتكم."
+    "سيارات": lambda city, gear, details: (
+        f"🚛 *تقرير حالة المركبة والآليات - {city}*\n\n"
+        f"📌 *العرض المعني:* {details}\n"
+        f"🛠️ *تقنية التوثيق:* {gear}\n\n"
+        "الوضع: تم التحقق من الحالة العامة والمواصفات.\n"
+        "التقرير الفني: ممتاز ومطابق للمعايير المطلوبة."
     ),
-    "فلاحة": lambda city, gear: (
-        f"🚜 *تقرير التوثيق الميداني الفلاحي - {city}*\nتمت عملية المسح الميداني"
-        f" للأراضي باستخدام *{gear}*.\nالتقرير الفني: المخططات والحدود موثقة"
-        " ومتاحة للمراجعة.\nالاستراتيجية: جاهزون للتطوير والاستغلال الفلاحي."
+    "فلاحة": lambda city, gear, details: (
+        f"🚜 *تقرير المسح الفلاحي الميداني - {city}*\n\n"
+        f"📌 *العرض المعني:* {details}\n"
+        f"🛠️ *تقنية التوثيق:* {gear}\n\n"
+        "الوضع: تم مسح الحدود والتوثيق البصري.\n"
+        "الاستراتيجية: الأرض جاهزة للاستغلال والتطوير الاستثماري."
     ),
 }
 
+# 5. حالة النظام
 if "last_action" not in st.session_state:
   st.session_state["last_action"] = "System Idle - Monitoring All Sectors..."
 
+# 6. واجهة المستخدم المركزية
 st.title("👑 TASSAOUT OMEGA OS | Field Agent v3.0")
-st.sidebar.success("System Status: Online & Monitoring ✅")
-st.sidebar.metric("الصور المؤرشفة", len(os.listdir(GALLERY_FOLDER)))
+st.sidebar.success("System Status: Online & Secured ✅")
+st.sidebar.metric("الصور المؤرشفة ميدانياً", len(os.listdir(GALLERY_FOLDER)))
 
-tab1, tab2 = st.tabs(["📸 التوثيق الميداني + الوكيل", "📦 الأرشيف"])
+tab1, tab2, tab3 = st.tabs(
+    ["📸 الكاميرا والتوثيق الشامل", "🧠 شاشة تفاعل الوكيل", "📦 الأرشيف والتقارير"]
+)
 
 with tab1:
-  st.subheader("مركز القيادة الميداني")
-  selected_env = st.selectbox(
-      "اختر بيئة التوثيق:", list(ENVIRONMENT_PRESETS.keys())
+  st.subheader("📷 مركز التصوير والتوثيق الميداني العالي")
+  col1, col2 = st.columns(2)
+  with col1:
+    selected_env = st.selectbox(
+        "اختر بيئة التصوير:", list(ENVIRONMENT_PRESETS.keys())
+    )
+  with col2:
+    selected_sector = st.selectbox("اختر القطاع:", CORE_DB["sectors"])
+
+  current_preset = ENVIRONMENT_PRESETS.get(
+      selected_env, list(ENVIRONMENT_PRESETS.values())[0]
   )
-  current_preset = ENVIRONMENT_PRESETS[selected_env]
 
-  user_input = st.text_area(
-      "اكتب تعليماتك هنا:",
-      placeholder="مثال: TASSAOUT MEGA GO عقار مراكش",
+  photo = st.camera_input(
+      "التقط المشهد بوضوح تام (الكاميرا مفعلة)", key="mega_cam_screen"
   )
-  photo = st.camera_input("📷 أو التقط صورة للتوثيق")
 
-  if st.button("تفعيل الوكيل وإرسال التقرير"):
-    report_text = ""
-    image_path = None
-
-    if photo:
-      raw_image = Image.open(photo)
-      processed_image = apply_agentic_vision(raw_image, current_preset)
-      image_path = save_to_gallery(processed_image, selected_env)
-      st.image(
-          processed_image,
-          caption=f"تم التوثيق بـ {current_preset['camera']}",
-          use_container_width=True,
-      )
-
-    if "TASSAOUT MEGA GO" in user_input.upper():
-      sector = next((s for s in CORE_DB["sectors"] if s in user_input), "عام")
-      city = next((c for c in CORE_DB["cities"] if c in user_input), "المغرب")
-      gear = CORE_DB["tech"].get(sector, "Universal Sensor")
-
-      generator = xl_templates.get(
-          sector,
-          lambda c, g: (
-              f"📌 *تقرير ميداني - {c}*\nتم التوثيق بواسطة *{g}*.\nالحالة: جاهز"
-              " للمراجعة."
-          ),
-      )
-      report_text = generator(city, gear)
-
-      st.session_state["last_action"] = report_text
-      st.success("✅ تم تفعيل أمر MEGA GO بنجاح")
-    else:
-      report_text = f"طلب عام مسجل: {user_input}"
-      st.info("🔄 الطلب مسجل في سجل المهام العام")
-
-    if report_text:
-      whatsapp_number = "2126XXXXXXXX"
-      encoded_text = urllib.parse.quote(report_text)
-      whatsapp_url = f"[https://wa.me/](https://wa.me/){whatsapp_number}?text={encoded_text}"
-      st.link_button("📱 إرسال التقرير للواتساب الآن", whatsapp_url)
+  if photo:
+    raw_image = Image.open(photo)
+    processed_image = apply_agentic_vision(raw_image, current_preset)
+    image_path = save_to_gallery(processed_image, selected_env)
+    st.image(
+        processed_image,
+        caption=f"✅ تم التوثيق بنجاح عبر عدسة {current_preset['camera']}",
+        use_container_width=True,
+    )
+    st.success("تم حفظ الصورة في الأرشيف الميداني تلقائياً.")
 
 with tab2:
-  st.subheader("الأرشيف الذكي")
-  if st.button("📦 توليد حزمة الأرشيف ZIP"):
+  st.subheader("🧠 شاشة التفاعل المباشر مع الوكيل (TASSAOUT MEGA GO)")
+
+  active_sector = st.selectbox(
+      "استعراض العروض المسجلة في النظام:", CORE_DB["sectors"], key="sec_view"
+  )
+  available_items = CORE_DB["listings"].get(
+      active_sector, ["عروض عامة متوفرة في النظام للتطوير والتسويق"]
+  )
+  selected_item = st.selectbox("اختر العقار/الطلب للعمل عليه:", available_items)
+
+  user_input = st.text_area(
+      "أدخل تعليماتك للوكيل (أو اكتب الكود السري للتفعيل الفوري):",
+      value=f"TASSAOUT MEGA GO {active_sector} قلعة السراغنة - {selected_item}",
+      height=100,
+  )
+
+  if st.button("🚀 تنفيذ أمر الوكيل وتجهيز التقرير"):
+    city = next((c for c in CORE_DB["cities"] if c in user_input), "المغرب")
+    gear = CORE_DB["tech"].get(active_sector, "Universal Sensor")
+
+    generator = xl_templates.get(
+        active_sector,
+        lambda c, g, d: (
+            f"📌 *تقرير ميداني - {c}*\nالعرض: {d}\nتم التوثيق بواسطة"
+            f" *{g}*.\nالحالة: جاهز للإرسال."
+        ),
+    )
+    report_text = generator(city, gear, selected_item)
+    st.session_state["last_action"] = report_text
+
+    st.success("🎯 تم توليد التقرير الميداني بنجاح بواسطة الوكيل!")
+    st.code(report_text, language="markdown")
+
+    # رقم الواتساب المصحح بدقة
+    whatsapp_number = "212691897126"
+    encoded_text = urllib.parse.quote(report_text)
+    whatsapp_url = f"https://wa.me/{whatsapp_number}?text={encoded_text}"
+    st.link_button(
+        "📱 اضغط هنا لإرسال التقرير فوراً عبر الواتساب", whatsapp_url
+    )
+
+with tab3:
+  st.subheader("📦 الأرشيف الذكي والتحميل")
+  st.write(
+      "جميع الصور والتقارير الميدانية تُحفظ هنا بشكل منظم لضمان سرعة الاسترجاع."
+  )
+  if st.button("📦 توليد وتحميل حزمة الأرشيف الكاملة (ZIP)"):
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w") as zip_file:
       for file in os.listdir(GALLERY_FOLDER):
         zip_file.write(os.path.join(GALLERY_FOLDER, file), file)
     st.download_button(
-        "⬇️ تحميل الأرشيف",
+        "⬇️ تحميل الأرشيف البرمجي والميداني الآن",
         data=zip_buffer.getvalue(),
-        file_name=f"ARCHIVE_{datetime.now().strftime('%Y-%m-%d')}.zip",
+        file_name=f"ARCHIVE_TASSAOUT_{datetime.now().strftime('%Y-%m-%d')}.zip",
     )
