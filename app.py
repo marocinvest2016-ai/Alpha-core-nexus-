@@ -1,4 +1,4 @@
-      from datetime import datetime
+from datetime import datetime
 import io
 import os
 import urllib.parse
@@ -6,14 +6,10 @@ import zipfile
 from PIL import Image, ImageEnhance
 import streamlit as st
 
-# 1. إعداد النظام السيادي بشاشة واسعة
-st.set_page_config(
-    page_title="TASSAOUT OMEGA OS", page_icon="👑", layout="wide"
-)
+st.set_page_config(page_title="TASSAOUT OMEGA OS", page_icon="👑", layout="wide")
 GALLERY_FOLDER = "gallery"
 os.makedirs(GALLERY_FOLDER, exist_ok=True)
 
-# 2. قاعدة البيانات والعروض الديناميكية المباشرة
 CORE_DB = {
     "sectors": ["عقار", "سيارات", "فلاحة", "مواد إنشائية"],
     "cities": ["مراكش", "قلعة السراغنة", "الدار البيضاء", "أكادير", "طنجة"],
@@ -139,7 +135,6 @@ with tab1:
       selected_env, list(ENVIRONMENT_PRESETS.values())[0]
   )
 
-  # خيار مزدوج: التصوير المباشر أو رفع صورة من الهاتف/الجهاز
   upload_option = st.radio(
       "اختر طريقة إدخال الصورة:",
       ["التقاط صورة مباشرة بالكاميرا", "تحميل صورة من الجهاز/الهاتف"],
