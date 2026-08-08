@@ -1,3 +1,4 @@
+```python
 from datetime import datetime
 import io
 import os
@@ -176,3 +177,5 @@ with tab2:
         data=zip_buffer.getvalue(),
         file_name=f"ARCHIVE_{datetime.now().strftime('%Y-%m-%d')}.zip",
     )
+
+```
