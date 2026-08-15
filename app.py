@@ -1,8 +1,12 @@
+إليك **الكود الكامل والنهائي** لملف `app.py` مدمجاً فيه التبويب الرابع الخاص بإضافة العروض والصفقات الجديدة مباشرة من واجهة التطبيق إلى قاعدة بيانات Supabase بكل احترافية:
+
+```python
 import os
 import streamlit as st
 import pandas as pd
 from datetime import datetime
 from supabase import create_client, Client
+import urllib.parse
 
 st.set_page_config(
     page_title="Meta Tassaout - المكتب السيادي", page_icon="👑", layout="wide"
@@ -72,14 +76,15 @@ class AmarAgent:
     return msg
 
 
-# 2. الواجهة وتعدد التبويبات
+# 2. الواجهة وتعدد التبويبات (4 تبويبات شاملة)
 st.title("👑 Meta Tassaout - المكتب السيادي")
 st.markdown("### الحالة: 🟢 نظام إدارة العقارات والخدمات المتعددة")
 
-tab1, tab2, tab3 = st.tabs([
-    "📸 التصوير أو تحميل الصور (متعدد)",
+tab1, tab2, tab3, tab4 = st.tabs([
+    "📸 التصوير أو تحميل الصور",
     "🧠 عروض الوكيل والتفاعل",
     "📚 مواضيع أخرى",
+    "➕ إضافة عرض جديد",
 ])
 
 with tab1:
@@ -117,8 +122,6 @@ with tab2:
           "📲 نسخ التقرير لإرساله يدوياً عبر الواتساب:", rapport, height=200
       )
 
-      import urllib.parse
-
       encoded_msg = urllib.parse.quote(rapport)
       whatsapp_url = f"https://wa.me/{MY_PHONE}?text={encoded_msg}"
       st.markdown(
@@ -136,3 +139,26 @@ with tab3:
     * **مواد البناء والتجهيزات:** حديد، أسمنت، وسياجات فلاحية (RITA FER / Tassaout Services).
     * **خدمات رقمية وتسويق:** تصميم اللوحات الإشهارية وتطوير الأنظمة الذكية.
     """)
+
+with tab4:
+  st.subheader("إضافة عرض عقاري أو صفقة جديدة")
+  with st.form("add_ad_form"):
+    msg = st.text_input("نص العرض/الإعلان (مثل: أرض فلاحية بالهدى)")
+    reg = st.text_input("المنطقة/المدينة (مثل: قلعة السراغنة)")
+    mnt = st.number_input("المبلغ (بالدرهم)", min_value=0)
+    submit = st.form_submit_button("حفظ العرض في السيرفر")
+
+    if submit:
+      if msg and reg:
+        try:
+          data = {"message": msg, "region": reg, "montant": mnt}
+          supabase.table("instant_ads").insert(data).execute()
+          st.success("تم حفظ العرض بنجاح في قاعدة البيانات! 🚀")
+        except Exception as e:
+          st.error(f"خطأ أثناء الحفظ: {e}")
+      else:
+        st.warning("يرجى ملء البيانات الأساسية.")
+
+```
+
+قم بنسخ هذا الكود بالكامل واستبداله بملف `app.py` لديك، وسيصبح التطبيق جاهزاً تماماً لإضافة وبحث العقارات بكل مروءة وسهولة 👑.
