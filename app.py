@@ -1,104 +1,138 @@
-import textwrap
-from datetime import datetime
-import urllib.parse
-from PIL import Image, ImageDraw
+import os
 import streamlit as st
+import pandas as pd
+from datetime import datetime
+from supabase import create_client, Client
 
-# ==========================================
-# 1. دالة توليد الإعلان التسويقي
-# ==========================================
-def generate_marketing_ad(image1_path, image2_path, sector, city):
-    """Génère un Collage 2160x1080 + Message WhatsApp en Français"""
+st.set_page_config(
+    page_title="Meta Tassaout - المكتب السيادي", page_icon="👑", layout="wide"
+)
+
+# 1. الاتصال بـ Supabase
+SUPABASE_URL = st.secrets.get("SUPABASE_URL", "")
+SUPABASE_KEY = st.secrets.get("SUPABASE_KEY", "")
+MY_PHONE = "212691897126"
+
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+
+class AmarAgent:
+
+  def __init__(self, nom_entreprise):
+    self.nom = nom_entreprise
+
+  def scanner_domain(self, keyword):
     try:
-        img1 = Image.open(image1_path).resize((1080, 1080)) # Bien Immobilier
-        img2 = Image.open(image2_path).resize((1080, 1080)) # Fleurs/Nature
-    except: return None, "Veuillez télécharger les 2 images d'abord"
+      res = (
+          supabase.table("instant_ads")
+          .select("*")
+          .ilike("message", f"%{keyword}%")
+          .limit(5)
+          .execute()
+      )
+      opps = res.data
+    except:
+      opps = []
+    if not opps:
+      opps = [{
+          "message": f"صفقة توريد {keyword}",
+          "region": "Marrakech-Safi",
+          "montant": 120000,
+      }]
+    return [
+        {
+            "region": ad.get("region", "Marrakech-Safi"),
+            "ville": keyword,
+            "objet": ad.get("message", "صفقة")[:100],
+            "montant_est": ad.get("montant", 45000),
+        }
+        for ad in opps
+    ]
 
-    # Création du Collage "Contraste & Luxe"
-    collage = Image.new('RGB', (2160, 1080))
-    collage.paste(img1, (0, 0))
-    collage.paste(img2, (1080, 0))
-    
-    draw = ImageDraw.Draw(collage)
-    
-    # Texte sur l'image
-    ad_text_on_image = textwrap.fill(
-        f"Au cœur de {city}, nous allions la beauté de la nature à "
-        f"l'élégance du design moderne. Le Bureau Tassaout Digital vous propose "
-        f"des opportunités d'investissement en {sector} alliant luxe et authenticité.", width=45
-    )
-    
-    draw.rectangle([(50, 750), (2110, 1030)], fill=(0,0,0,180)) # Fond transparent
-    draw.text((100, 780), ad_text_on_image, fill="white") 
-    draw.text((100, 980), "📱 Contact: +212 691 897 126", fill="#FFD700") # Or
-    draw.text((100, 700), "👑 BUREAU TASSAOUT DIGITAL | IMMOBILIER & AFFAIRES", fill="#FFD700")
+  def analyse_domain(self, opps):
+    for opp in opps:
+      opp["concurrence"] = (
+          "🟢 ضعيفة" if opp["montant_est"] < 100000 else "🟡 متوسطة"
+      )
+      ht = opp["montant_est"] / 1.20
+      opp["ht"] = round(ht, 2)
+      opp["tva"] = round(opp["montant_est"] - ht, 2)
+      opp["benefice"] = round(ht * 0.14, 2)
+      opp["score"] = 95
+    return sorted(opps, key=lambda x: x["score"], reverse=True)
 
-    # Sauvegarde
-    ad_path = f"AD_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
-    collage.save(ad_path, quality=95)
-    
-    # Message WhatsApp Officiel en Français
-    whatsapp_msg = f"""--- 👑 BUREAU TASSAOUT DIGITAL | IMMOBILIER & AFFAIRES À EL KELAA DES SRAGHNA 👑 ---
-[ TASSAOUT OMEGA PREMIUM - 100MP PRO-GRADE ]
+  def rapport_comm(self, opps):
+    msg = f"*👑 تقرير عامر - {datetime.now().strftime('%d/%m/%Y %H:%M')}*\n\n"
+    for i, opp in enumerate(opps, 1):
+      msg += (
+          f"*{i}. [{opp['score']}/100] {opp['objet']}*\n💰"
+          f" {opp['montant_est']} DH | 📍 {opp['region']} | 📈 ربح صافي:"
+          f" {opp['benefice']} DH\n\n"
+      )
+    return msg
 
-Secteur: {sector} | Ville: {city}
-Style Visuel: Mode Bright
-    
-📢 ANNONCE PROMOTIONNELLE:
-Ces deux images peuvent être utilisées de manière créative pour créer du matériel marketing unique pour le bureau "Tassaout Digital" à {city}. L'idée est de combiner la modernité du {sector} et l'élégance intemporelle pour positionner le bureau comme une destination offrant le meilleur des deux mondes.
 
-Caméra tassaout omega go
-    
-📸 DOCUMENTATION VISUELLE:
-- Traitement: 100MP Super-Résolution
-- Équilibre Visuel: Mode Bright Optimisé
+# 2. الواجهة وتعدد التبويبات
+st.title("👑 Meta Tassaout - المكتب السيادي")
+st.markdown("### الحالة: 🟢 نظام إدارة العقارات والخدمات المتعددة")
 
-✒️ Signature Officielle: Ameur signature
-⚡ Système TASSAOUT OMEGA OS"""
-
-    return ad_path, whatsapp_msg
-
-# ==========================================
-# 2. تعريف الألسنة (Tabs) والواجهة
-# ==========================================
-# تأكد من دمج هذه الألسنة مع الألسنة الموجودة لديك في المشروع
-tab1, tab2, tab3, tab4 = st.tabs([
-    "📸 التصوير أو تحميل الصور", 
-    "🧠 عروض الوكيل والتفاعل", 
-    "📦 الأرشيف",
-    "🎨 Centre de Création Publicitaire"
+tab1, tab2, tab3 = st.tabs([
+    "📸 التصوير أو تحميل الصور (متعدد)",
+    "🧠 عروض الوكيل والتفاعل",
+    "📚 مواضيع أخرى",
 ])
 
-with tab4:
-    st.subheader("🎨 Centre de Création Publicitaire - Contraste & Luxe")
-    st.write("Téléchargez deux images : Propriété immobilière + Nature/Fleurs")
+with tab1:
+  st.subheader("رفع ومعالجة الصور التسويقية (يدعم عدة صور معا)")
+  uploaded_files = st.file_uploader(
+      "اختر الصور (يمكنك اختيار أكثر من صورة)",
+      type=["png", "jpg", "jpeg"],
+      accept_multiple_files=True,
+  )
 
-    col1, col2 = st.columns(2)
-    with col1: 
-        ad_img1 = st.file_uploader("📷 1. Propriété / Immeuble", type=["jpg", "png"], key="ad1")
-    with col2: 
-        ad_img2 = st.file_uploader("🌹 2. Fleurs / Nature", type=["jpg", "png"], key="ad2")
+  if uploaded_files:
+    st.success(f"تم تحميل {len(uploaded_files)} صورة بنجاح!")
+    cols = st.columns(3)
+    for idx, uploaded_file in enumerate(uploaded_files):
+      with cols[idx % 3]:
+        st.image(
+            uploaded_file,
+            caption=f"صورة رقم {idx+1}",
+            use_container_width=True,
+        )
 
-    # تحديد القوائم الافتراضية للقطاعات والمدن (تأكد من توافقها مع ملفك)
-    sectors_list = ["عقار سكني وتجاري", "أراضي فلاحية", "شقق للكراء"]
-    cities_list = ["قلعة السراغنة", "مراكش"]
+with tab2:
+  st.subheader("تحليلات الوكيل وعروض السوق")
+  city = st.sidebar.text_input("المدينة للبحث", "قلعة السراغنة")
+  amar = AmarAgent("Sraghna Digital Market")
 
-    ad_sector = st.selectbox("Secteur de l'annonce:", sectors_list, key="ad_sec")
-    ad_city = st.selectbox("Ville:", cities_list, key="ad_city")
+  if st.button("🚀 تشغيل الوكيل وتوليد التقرير"):
+    opps_brutes = amar.scanner_domain(city)
+    if opps_brutes:
+      opps_analyse = amar.analyse_domain(opps_brutes)
+      rapport = amar.rapport_comm(opps_analyse)
 
-    if st.button("🚀 Générer l'Annonce Professionnelle", type="primary"):
-        if ad_img1 and ad_img2:
-            ad_path, ad_message = generate_marketing_ad(ad_img1, ad_img2, ad_sector, ad_city)
-            
-            if ad_path:
-                st.image(ad_path, caption="Annonce prête à être publiée", use_container_width=True)
-                st.success("✅ Annonce générée avec succès via TASSAOUT OMEGA OS !")
-                
-                st.code(ad_message, language="markdown")
-                
-                whatsapp_url = f"https://wa.me/212691897126?text={urllib.parse.quote(ad_message)}"
-                st.link_button("📱 Partager l'annonce sur WhatsApp", whatsapp_url)
-            else:
-                st.error(ad_message)
-        else:
-            st.error("Veuillez télécharger les deux images.")
+      st.success("تم توليد التقرير بنجاح!")
+      st.text_area(
+          "📲 نسخ التقرير لإرساله يدوياً عبر الواتساب:", rapport, height=200
+      )
+
+      import urllib.parse
+
+      encoded_msg = urllib.parse.quote(rapport)
+      whatsapp_url = f"https://wa.me/{MY_PHONE}?text={encoded_msg}"
+      st.markdown(
+          f"### [🔗 اضغط هنا للإرسال المباشر عبر واتساب]({whatsapp_url})",
+          unsafe_allow_html=True,
+      )
+    else:
+      st.warning("⚠️ لا توجد صفقات جديدة مطابقة حالياً.")
+
+with tab3:
+  st.subheader("📚 مواضيع وأقسام إضافية")
+  st.markdown("""
+    * **أراضي فلاحية وفيرمات:** عروض خاصة في قلعة السراغنة ومراكش.
+    * **بقع أرضية سكنية وتجارية:** (الهدى، البدر، المنارة).
+    * **مواد البناء والتجهيزات:** حديد، أسمنت، وسياجات فلاحية (RITA FER / Tassaout Services).
+    * **خدمات رقمية وتسويق:** تصميم اللوحات الإشهارية وتطوير الأنظمة الذكية.
+    """)
