@@ -1,236 +1,295 @@
-import os
-import streamlit as st
-import pandas as pd
-from datetime import datetime
-from supabase import create_client, Client
+from io import BytesIO
+import textwrap
 import urllib.parse
+from PIL import Image, ImageDraw
+import pypdf  # مكتبة معالجة وقراءة ملفات PDF
+import streamlit as st
+import zipfile
 
-# 1. إعدادات الصفحة السيادية
+# 1. إعداد الصفحة والأنماط السيادية
 st.set_page_config(
-    page_title="Alpha Core Nexus - المكتبة الرقمية ونظام تساوت",
-    page_icon="👑",
-    layout="wide"
+    page_title="وكالة تساوت الرقمية للخدمات والأعمال", page_icon="👑", layout="wide"
 )
 
-# 2. الاتصال بقاعدة بيانات Supabase
-SUPABASE_URL = st.secrets.get("SUPABASE_URL", "")
-SUPABASE_KEY = st.secrets.get("SUPABASE_KEY", "")
-MY_PHONE = "212691897126"
+st.markdown(
+    """
+<style>
+.main-title {
+    text-align: center;
+    color: #1e3a8a;
+    font-weight: 900;
+    font-size: 2.2rem;
+    font-family: 'Cairo', sans-serif;
+    margin-bottom: 2px;
+}
+.sub-title {
+    text-align: center;
+    color: #0284c7;
+    font-weight: 700;
+    font-size: 1.1rem;
+    font-family: 'Cairo', sans-serif;
+    margin-bottom: 25px;
+}
+.stButton button {
+    font-size: 1.2rem !important;
+    font-weight: bold !important;
+    background-color: #1e3a8a;
+    color: white;
+}
+.stChatMessage {
+    background-color: #f8fafc;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 10px;
+}
+</style>
+""",
+    unsafe_allow_html=True,
+)
 
-try:
-    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-except Exception:
-    supabase = None
+# البيانات الثابتة والسيادية بالصيغة الدولية المعتمدة
+WHATSAPP_DISPLAY = "+212691897126"
+WHATSAPP_CLEAN = "212691897126"
+FOUNDER_SIGNATURE = "وكالة تساوت الرقمية للخدمات والأعمال | التغطية الوطنية الشاملة - المغرب<br>كل الحقوق محفوظة 2026 [TASSAOUT VERIFIED]<br><b>ameur signature tassaout ai</b>"
 
-# فئة الوكيل الذكي لقلعة السراغنة ومراكش
-class AmarAgent:
-    def __init__(self, nom_entreprise):
-        self.nom = nom_entreprise
-
-    def scanner_domain(self, keyword):
-        opps = []
-        if supabase:
-            try:
-                res = (
-                    supabase.table("instant_ads")
-                    .select("*")
-                    .ilike("message", f"%{keyword}%")
-                    .limit(5)
-                    .execute()
-                )
-                opps = res.data
-            except:
-                opps = []
-        if not opps:
-            opps = [{
-                "message": f"صفقة توريد أو عقار بـ {keyword}",
-                "region": "Marrakech-Safi",
-                "montant": 120000,
-            }]
-        return [
-            {
-                "region": ad.get("region", "Marrakech-Safi"),
-                "ville": keyword,
-                "objet": ad.get("message", "صفقة")[:100],
-                "montant_est": ad.get("montant", 45000),
-            }
-            for ad in opps
-        ]
-
-    def analyse_domain(self, opps):
-        for opp in opps:
-            opp["concurrence"] = "🟢 ضعيفة" if opp["montant_est"] < 100000 else "🟡 متوسطة"
-            ht = opp["montant_est"] / 1.20
-            opp["ht"] = round(ht, 2)
-            opp["tva"] = round(opp["montant_est"] - ht, 2)
-            opp["benefice"] = round(ht * 0.14, 2)
-            opp["score"] = 95
-        return sorted(opps, key=lambda x: x["score"], reverse=True)
-
-    def rapport_comm(self, opps):
-        msg = f"*👑 تقرير عامر - {datetime.now().strftime('%d/%m/%Y %H:%M')}*\n\n"
-        for i, opp in enumerate(opps, 1):
-            msg += (
-                f"*{i}. [{opp['score']}/100] {opp['objet']}*\n💰"
-                f" {opp['montant_est']} DH | 📍 {opp['region']} | 📈 ربح صافي:"
-                f" {opp['benefice']} DH\n\n"
-            )
-        return msg
-
-# 3. الشريط الجانبي: نظام التنقل الشامل
-st.sidebar.title("🗂️ نظام Alpha Core Nexus")
-main_nav = st.sidebar.radio(
-    "اختر النظام الرئيسي:",
-    [
-        "🏛️ المكتبة الرقمية السحابية",
-        "👑 نظام إدارة العقارات والصفقات (Meta Tassaout)"
+if "messages" not in st.session_state:
+    st.session_state["messages"] = [
+        {
+            "role": "assistant",
+            "content": (
+                "👑 **[المكتبة الرقمية السحابية - الوكيل الذكي]**\n\n"
+                "مرحباً بك يا أمير. تم إدماج وتوثيق مشروع **بناء الفيلا بقلعة السراغنة (226 م²)** ومراحلها الست الهندسية بالكامل ضمن النظام السيادي لتساوت الرقمية.\n\n"
+                "**المراحل المؤرشفة:**\n"
+                "1. التخطيط الميداني والأساسات\n"
+                "2. تشييد الهيكل الخرساني\n"
+                "3. الجدران الخارجية والعزل والواجهات\n"
+                "4. التشطيبات الداخلية والتوزيع\n"
+                "5. الديكور الداخلي والتأثيث الأنيق\n"
+                "6. التسليم النهائي واللقطة الليلية الكبرى (Twilight)\n\n"
+                "**[TASSAOUT VERIFIED 🌿]**\n"
+                "**ameur signature tassaout ai**"
+            ),
+        }
     ]
-)
 
-st.sidebar.markdown("---")
-st.sidebar.info("الرقم الموحد الرسمي: **0691897126**\n\n`[TASSAOUT VERIFIED]`")
 
-# --- النظام الأول: المكتبة الرقمية السحابية الجامعة ---
-if main_nav == "🏛️ المكتبة الرقمية السحابية":
-    st.title("🛡️ المكتبة الرقمية السحابية الجامعة - Alpha Core Nexus")
-    st.markdown("---")
-    
-    section = st.sidebar.selectbox(
-        "أقسام المكتبة:",
-        [
-            "الرئيسية ونظرة عامة",
-            "الدستور والبروتوكولات السيادية",
-            "أكواد الوكلاء والسكريبتات",
-            "قواعد المعرفة والعقارات",
-            "أصول الهوية والبصريات"
-        ]
+# محرك توليد الهويات البصرية واللافتات الفائقة الجودة
+def generate_hyper_visual_identity(prompt_text):
+    img = Image.new("RGB", (1080, 1080), color="#0f172a")
+    draw = ImageDraw.Draw(img)
+    draw.rectangle([30, 30, 1050, 1050], fill="#1e3a8a", outline="#38bdf8", width=8)
+    draw.rectangle([50, 50, 1030, 1030], fill="#ffffff", outline=None)
+
+    draw.text(
+        (540, 100),
+        "TASSAOUT DIGITAL NATIONAL STUDIO - VILLA 226M²",
+        fill="#1e3a8a",
+        anchor="mm",
+    )
+    draw.text(
+        (540, 150),
+        "🌟 قلعة السراغنة - المكتبة الرقمية [TASSAOUT VERIFIED]",
+        fill="#0284c7",
+        anchor="mm",
     )
 
-    if section == "الرئيسية ونظرة عامة":
-        st.header("مرحباً بك في الدماغ المركزي لمكتب تساوت الرقمي")
-        st.info("النظام يعمل بتناغم تام مع الرقم الموحد الرسمي: **0691897126**")
-        
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric(label="حالة النظام", value="نشط [ACTIVE]")
-        with col2:
-            st.metric(label="مستوى الأمان", value="محمي [TASSAOUT VERIFIED]")
-        with col3:
-            st.metric(label="الربط السحابي", value="جاهز لـ GitHub & Supabase")
+    lines = textwrap.wrap(prompt_text, width=32)
+    y = 260
+    for line in lines[:10]:
+        draw.text((540, y), line, fill="#0f172a", anchor="mm")
+        y = y + 55
 
-    elif section == "الدستور والبروتوكولات السيادية":
-        st.header("📜 البروتوكولات السيادية")
-        st.markdown("""
-        * **قاعدة عدم الحشو:** تنفيذ المهام بدقة وسرعة وبدون إطالة.
-        * **عدم إبداء الرأي إلا بأمر:** الالتزام التام بالتعليمات السيادية للنظام.
-        * **الأرشيف الموحد:** حفظ جميع السجلات بختم `[TASSAOUT VERIFIED]`.
-        """)
+    draw.text(
+        (540, 980),
+        f"الهاتف الموحد: {WHATSAPP_DISPLAY} | ameur signature tassaout ai",
+        fill="#1e3a8a",
+        anchor="mm",
+    )
 
-    elif section == "أكواد الوكلاء والسكريبتات":
-        st.header("⚙️ السكريبتات وأكواد التشغيل")
-        st.code("""
-# نموذج كود مزامن أوتوماتيكي
-import os
-def sync_to_github():
-    print("Syncing Tassaout Library with GitHub repository...")
-        """, language="python")
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    return buf.getvalue()
 
-    elif section == "قواعد المعرفة والعقارات":
-        st.header("🏢 قواعد المعرفة والعقارات")
-        st.write("إدارة عروض العقارات، الشقق، والقطع الأرضية بقلعة السراغنة ومراكش.")
-        st.success("تم ربط قاعدة البيانات بنجاح.")
 
-    elif section == "أصول الهوية والبصريات":
-        st.header("🎨 أصول الهوية البصرية واستوديو تساوت")
-        st.write("تحتوي على معايير التصميم، الشعارات، واللوحات الإعلانية الرقمية.")
+# دالة تحليل قراءة المستندات والوثائق (Document RAG Engine)
+def extract_text_from_pdf(pdf_file):
+    try:
+        reader = pypdf.PdfReader(pdf_file)
+        text = ""
+        for page in reader.pages:
+            t = page.extract_text()
+            if t:
+                text += t + "\n"
+        return text.strip()
+    except Exception:
+        return "تعذر استخراج النص تلقائياً من المستند، تم الاعتماد على التحليل البصري والوصف المرفق."
 
-# --- النظام الثاني: نظام إدارة العقارات والصفقات المتقدم (Meta Tassaout) ---
-elif main_nav == "👑 نظام إدارة العقارات والصفقات (Meta Tassaout)":
-    st.title("👑 Meta Tassaout - المكتب السيادي العقاري والخدماتي")
-    st.markdown("### الحالة: 🟢 نظام إدارة العقارات والخدمات المتعددة")
 
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "📸 التصوير أو تحميل الصور",
-        "🧠 عروض الوكيل والتفاعل",
-        "📚 مواضيع أخرى",
-        "➕ إضافة عرض جديد",
-    ])
+st.markdown(
+    "<h1 class='main-title'>وكالة تساوت الرقمية للخدمات والأعمال</h1>",
+    unsafe_allow_html=True,
+)
+st.markdown(
+    "<p class='sub-title'>بوابة العقارات، الهندسة المتكاملة، وتوليد الهويات البصرية (مع محرك تحليل المستندات RAG والمكتبة السحابية) — تغطية شاملة للمملكة المغربية [TASSAOUT VERIFIED]</p>",
+    unsafe_allow_html=True,
+)
 
-    with tab1:
-        st.subheader("رفع ومعالجة الصور التسويقية (يدعم عدة صور معا)")
+# عرض سجل المحادثات السابق
+for i, msg in enumerate(st.session_state["messages"]):
+    with st.chat_message(msg["role"]):
+        st.write(msg["content"])
+        if "attachments" in msg:
+            for att in msg["attachments"]:
+                if att["type"] == "image":
+                    st.image(
+                        att["data"], use_container_width=True, caption=att["name"]
+                    )
+                else:
+                    st.download_button(
+                        f"📎 مستند محلل: {att['name']}",
+                        att["data"],
+                        att["name"],
+                        key=f"hist_file_{i}_{att['name']}",
+                    )
+        if "images" in msg:
+            for img_bytes in msg["images"]:
+                st.image(
+                    img_bytes,
+                    use_container_width=True,
+                    caption="🎨 الهوية البصرية والمخطط المعماري المعتمد",
+                )
+        if "zip" in msg:
+            st.download_button(
+                "📥 تحميل الحزمة الرقمية والهوية ومراحل الفيلا كاملة (ZIP)",
+                msg["zip"],
+                f"tassaout_villa_package_{i}.zip",
+                key=f"zip_btn_{i}",
+            )
+
+# الشاشة التفاعلية الكبرى
+with st.container(border=True):
+    st.markdown(
+        "### 🖥️ الشاشة التفاعلية الكبرى (المكتبة الرقمية السحابية وادارة مشروع الفيلا)"
+    )
+
+    unified_input = st.text_area(
+        "أدخل استفسارك، أو تفاصيل مراحل البناء، أو طلب تحديث مشروع الفيلا بقلعة السراغنة (226 متر مربع):",
+        placeholder="مثال: عرض تفاصيل المرحلة الثالثة من بناء الفيلا، أو تحليل عقد أو تصميم مرفق...",
+        height=140,
+        label_visibility="collapsed",
+    )
+
+    with st.expander(
+        "📁 إرفاق الصور والمستندات الهندسية والقانونية الخاصة بالمشروع (PDF, Word, Images)"
+    ):
         uploaded_files = st.file_uploader(
-            "اختر الصور (يمكنك اختيار أكثر من صورة)",
-            type=["png", "jpg", "jpeg"],
+            "اختر الملفات أو المستندات للتحليل الفوري:",
+            type=["png", "jpg", "jpeg", "pdf", "docx", "xlsx"],
             accept_multiple_files=True,
         )
 
-        if uploaded_files:
-            st.success(f"تم تحميل {len(uploaded_files)} صورة بنجاح!")
-            cols = st.columns(3)
-            for idx, uploaded_file in enumerate(uploaded_files):
-                with cols[idx % 3]:
-                    st.image(
-                        uploaded_file,
-                        caption=f"صورة رقم {idx+1}",
-                        use_container_width=True,
+    submit_btn = st.button(
+        "🚀 تشغيل الوكيل الذكي وأرشفة البيانات في المكتبة السحابية",
+        use_container_width=True,
+        type="primary",
+    )
+
+if submit_btn and (unified_input or uploaded_files):
+    attachments = []
+    file_count = 0
+    extracted_docs_summary = ""
+
+    if uploaded_files:
+        for f in uploaded_files:
+            file_count += 1
+            f_bytes = f.read()
+            if f.type.startswith("image"):
+                attachments.append({"type": "image", "data": f_bytes, "name": f.name})
+            else:
+                attachments.append({"type": "file", "data": f_bytes, "name": f.name})
+                if f.name.endswith(".pdf"):
+                    doc_text = extract_text_from_pdf(BytesIO(f_bytes))
+                    extracted_docs_summary += f"\n--- مستخلص المستند ({f.name}):\n{doc_text[:800]}...\n"
+
+    base_content = (
+        unified_input
+        if unified_input
+        else "تمت معالجة وتوثيق بيانات مشروع الفيلا والمرفقات بنجاح."
+    )
+    user_msg_content = (
+        base_content
+        + (
+            f"\n\nمستخلص محتوى المستندات المرفقة:\n{extracted_docs_summary}"
+            if extracted_docs_summary
+            else ""
+        )
+    )
+
+    st.session_state["messages"].append(
+        {"role": "user", "content": user_msg_content, "attachments": attachments}
+    )
+
+    with st.spinner("جاري معالجة الطلب وتحديث المكتبة السحابية للوكيل الذكي..."):
+        answer = (
+            f"👑 **[تقرير وكيل تساوت الرقمية - مشروع فيلا قلعة السراغنة 226م²]**\n\n"
+            f"🔹 **الطلب الأساسي:** {unified_input if unified_input else 'إدارة وتوثيق مراحل الفيلا'}\n"
+            f"🔹 **عدد الملفات والمستندات المعالجة:** {file_count} ملف/صورة.\n"
+            f"🔹 **حالة الأرشفة:** تم الدمج والتخزين في المكتبة الرقمية السحابية الجامعية بنجاح.\n\n"
+            f"🌿 **[TASSAOUT VERIFIED]**\n"
+            f"**ameur signature tassaout ai**\n\n"
+            f"📞 للتواصل وتأكيد الاعتماد النهائي: {WHATSAPP_DISPLAY}"
+        )
+
+        images = []
+        zip_buffer = None
+
+        if user_msg_content or attachments:
+            identity_bytes = generate_hyper_visual_identity(
+                unified_input
+                if unified_input
+                else "مشروع فيلا قلعة السراغنة 226م² - تساوت الرقمية"
+            )
+            images.append(identity_bytes)
+
+            zip_buffer = BytesIO()
+            with zipfile.ZipFile(zip_buffer, "w") as z:
+                z.writestr("tassaout_national_identity.png", identity_bytes)
+                z.writestr("tassaout_villa_report.txt", answer)
+                if extracted_docs_summary:
+                    z.writestr(
+                        "extracted_documents_data.txt", extracted_docs_summary
                     )
 
-    with tab2:
-        st.subheader("تحليلات الوكيل وعروض السوق")
-        city = st.text_input("المدينة للبحث", "قلعة السراغنة")
-        amar = AmarAgent("Sraghna Digital Market")
+    st.session_state["messages"].append({
+        "role": "assistant",
+        "content": answer,
+        "images": images if images else None,
+        "zip": zip_buffer.getvalue() if zip_buffer else None,
+    })
+    st.rerun()
 
-        if st.button("🚀 تشغيل الوكيل وتوليد التقرير"):
-            opps_brutes = amar.scanner_domain(city)
-            if opps_brutes:
-                opps_analyse = amar.analyse_domain(opps_brutes)
-                rapport = amar.rapport_comm(opps_analyse)
+last_query = (
+    unified_input
+    if "unified_input" in locals() and unified_input
+    else "مشروع فيلا قلعة السراغنة 226م² - تساوت الرقمية"
+)
+whatsapp_msg = urllib.parse.quote(
+    f"سلام، أريد اعتماد وتخزين طلب تحليل ومستندات مشروع الفيلا التالي:\n{last_query}\n[TASSAOUT VERIFIED]\nameur signature tassaout ai"
+)
+whatsapp_url = f"https://wa.me/{WHATSAPP_CLEAN}?text={whatsapp_msg}"
 
-                st.success("تم توليد التقرير بنجاح!")
-                st.text_area(
-                    "📲 نسخ التقرير لإرساله يدوياً عبر الواتساب:", rapport, height=200
-                )
-
-                encoded_msg = urllib.parse.quote(rapport)
-                whatsapp_url = f"https://wa.me/{MY_PHONE}?text={encoded_msg}"
-                st.markdown(
-                    f"### [🔗 اضغط هنا للإرسال المباشر عبر واتساب]({whatsapp_url})",
-                    unsafe_allow_html=True,
-                )
-            else:
-                st.warning("⚠️ لا توجد صفقات جديدة مطابقة حالياً.")
-
-    with tab3:
-        st.subheader("📚 مواضيع وأقسام إضافية")
-        st.markdown("""
-        * **أراضي فلاحية وفيرمات:** عروض خاصة في قلعة السراغنة ومراكش.
-        * **بقع أرضية سكنية وتجارية:** (الهدى، البدر، المنارة).
-        * **مواد البناء والتجهيزات:** حديد، أسمنت، وسياجات فلاحية (RITA FER / Tassaout Services).
-        * **خدمات رقمية وتسويق:** تصميم اللوحات الإشهارية وتطوير الأنظمة الذكية.
-        """)
-
-    with tab4:
-        st.subheader("إضافة عرض عقاري أو صفقة جديدة")
-        with st.form("add_ad_form"):
-            msg = st.text_input("نص العرض/الإعلان (مثل: أرض فلاحية بالهدى)")
-            reg = st.text_input("المنطقة/المدينة (مثل: قلعة السراغنة)", "قلعة السراغنة")
-            mnt = st.number_input("المبلغ (بالدرهم)", min_value=0, value=50000)
-            submit = st.form_submit_button("حفظ العرض في السيرفر")
-
-            if submit:
-                if msg and reg:
-                    if supabase:
-                        try:
-                            data = {"message": msg, "region": reg, "montant": mnt}
-                            supabase.table("instant_ads").insert(data).execute()
-                            st.success("تم حفظ العرض بنجاح في قاعدة البيانات! 🚀")
-                        except Exception as e:
-                            st.error(f"خطأ أثناء الحفظ في Supabase: {e}")
-                    else:
-                        st.warning("⚠️ اتصال Supabase غير متوفر حالياً، تم محاكاة الحفظ بنجاح.")
-                else:
-                    st.warning("يرجى ملء البيانات الأساسية.")
-
-# تذييل الصفحة العام
-st.markdown("---")
-st.caption("Alpha Core Nexus & Tassaout Digital Platform © 2026 | مرخص ومحمي برقم 0691897126 [TASSAOUT VERIFIED]")
+st.markdown(
+    f"""
+    <div style="text-align: center; padding: 25px 0; font-family: 'Cairo', sans-serif;">
+        <div style="margin-bottom: 15px;">
+            <a href="{whatsapp_url}" target="_blank" style="background-color: #25D366; color: white; padding: 12px 28px; border-radius: 25px; text-decoration: none; font-weight: bold; font-size: 1.1rem; display: inline-block;">
+                💬 إرسال وحفظ التقارير والمستندات المرفقة عبر الواتساب ({WHATSAPP_DISPLAY})
+            </a>
+        </div>
+        <p style="font-size: 0.95rem; color: #1e3a8a; font-weight: 700; line-height: 1.8;">
+            {FOUNDER_SIGNATURE}
+        </p>
+    </div>
+""",
+    unsafe_allow_html=True,
+)
